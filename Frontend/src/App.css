@@ -1,0 +1,13 @@
+.app-container {
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.todo-card {
+  margin-bottom: 1rem;
+}
+
+.todo-title.completed {
+  text-decoration: line-through;
+  opacity: 0.6;
+}

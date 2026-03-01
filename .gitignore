@@ -1,0 +1,20 @@
+# .NET / Backend
+Backend/bin/
+Backend/obj/
+Backend/appsettings.Development.json
+Backend/appsettings.*.json
+
+# Node / Frontend
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.env
+Frontend/.env.*
+
+# IDEs
+.idea/
+.vscode/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
