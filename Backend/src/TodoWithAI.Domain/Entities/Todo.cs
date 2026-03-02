@@ -7,5 +7,8 @@ public class Todo
     public string Icon { get; set; } = string.Empty;
     public DateTime Date { get; set; } = DateTime.UtcNow;
 
+    public bool IsPinned { get; set; }
+    public int Order { get; set; }
+
     public List<TodoItem> Items { get; set; } = new();
 }

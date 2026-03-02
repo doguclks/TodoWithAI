@@ -12,10 +12,13 @@ public class TodoContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Todo>()
-            .HasMany(t => t.Items)
-            .WithOne(i => i.Todo)
-            .HasForeignKey(i => i.TodoId)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Todo>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasMany(t => t.Items)
+                .WithOne(i => i.Todo)
+                .HasForeignKey(i => i.TodoId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }

@@ -1,6 +1,7 @@
 using TodoWithAI.Domain.Entities;
 using TodoWithAI.Application.Interfaces.Repositories;
 using TodoWithAI.Application.Interfaces.Services;
+using TodoWithAI.Application.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TodoWithAI.API.Controllers;
@@ -19,9 +20,9 @@ public class TodosController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<Todo>> GetTodos()
+    public async Task<IEnumerable<Todo>> GetTodos([FromQuery] string? search)
     {
-        return await _repository.GetAllAsync();
+        return await _repository.GetAllAsync(search);
     }
 
     [HttpGet("{id}")]
@@ -54,6 +55,35 @@ public class TodosController : ControllerBase
     public async Task<IActionResult> DeleteTodo(int id)
     {
         await _todoService.DeleteTodoWithItemsAsync(id);
+        return NoContent();
+    }
+
+    [HttpPatch("{id}/pin")]
+    public async Task<IActionResult> PinTodo(int id)
+    {
+        var todo = await _repository.GetByIdAsync(id);
+        if (todo == null) return NotFound();
+
+        todo.IsPinned = true;
+        await _repository.UpdateAsync(todo);
+        return NoContent();
+    }
+
+    [HttpPatch("{id}/unpin")]
+    public async Task<IActionResult> UnpinTodo(int id)
+    {
+        var todo = await _repository.GetByIdAsync(id);
+        if (todo == null) return NotFound();
+
+        todo.IsPinned = false;
+        await _repository.UpdateAsync(todo);
+        return NoContent();
+    }
+
+    [HttpPut("order")]
+    public async Task<IActionResult> UpdateOrders([FromBody] List<TodoOrderUpdate> updates)
+    {
+        await _repository.UpdateOrderAsync(updates.Select(x => (x.Id, x.Order)));
         return NoContent();
     }
 }
