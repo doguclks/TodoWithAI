@@ -1,90 +1,79 @@
 # TickIt! (AntiGravity Todo)
 
-TickIt! is a modern, dynamic, and fully responsive To-Do application featuring a Kanban board with drag-and-drop capabilities. Built with a .NET 9 Web API backend and a Vite + React frontend, it emphasizes a sleek UI, high performance, and user-centric features.
+TickIt! is a premium, high-performance To-Do application built with a modern tech stack and a **Clean Architecture** approach. It features a dynamic Kanban board, multi-language support, and a robust **JWT-based Authentication** system.
 
-## 🚀 Features
+## 🌟 Key Features
 
-- **Kanban Board:** Organize tasks visually with drag-and-drop functionality using `@hello-pangea/dnd`.
-- **Dynamic Pages (Sidebar):** Create multiple "Todo" pages to group different tasks.
-- **Real-time Sync:** Renaming a page or changing its emoji icon in the sidebar instantly updates the main view.
-- **Customizable Icons:** Use a built-in emoji-picker to set custom icons for your Todo pages.
-- **Multi-language Support (i18n):** Easily switch between English and Turkish using intuitive flag icons.
-- **Dark & Light Mode:** Seamlessly toggle between dark and light themes (powered by Mantine).
-- **Modern UI:** Built with Mantine UI components and Tabler Icons for a polished, accessible user experience.
+- **JWT Authentication:** Secure user registration and login powered by .NET Identity and JWT Bearer tokens.
+- **Data Isolation:** Every user has their own private space. Todos and tasks are strictly scoped to the authenticated user.
+- **Kanban Board:** Interactive drag-and-drop workspace for managing tasks across "Todo", "In Progress", and "Done" states.
+- **Clean Architecture:** Backend organized into Domain, Application, Infrastructure, and API layers for maximum maintainability.
+- **Dynamic Dashboards:** Organize your life into multiple boards with custom titles and emoji icons.
+- **Multi-language (i18n):** Full support for English and Turkish with instant switching.
+- **Theme Support:** Polished Dark and Light modes using Mantine's advanced theme system.
+- **Unit Testing:** Comprehensive test suite for both Backend (XUnit) and Frontend (Vitest).
 
 ## 🛠️ Tech Stack
 
-**Frontend:**
-- [React](https://reactjs.org/) (via [Vite](https://vitejs.dev/))
-- [Mantine v7](https://mantine.dev/) (UI Components & Hooks)
-- [Axios](https://axios-http.com/) (API Requests)
-- `react-router-dom` (Routing)
-- `react-intl` (Internationalization/i18n)
-- `emoji-picker-react` (Emoji selector)
-- `@hello-pangea/dnd` (Drag and Drop)
+### **Backend (.NET 9)**
+- **Architecture:** Clean Architecture (Domain-Driven Design principles)
+- **Identity:** ASP.NET Core Identity for secure user management
+- **Security:** JWT (JSON Web Tokens) for stateless authentication
+- **ORM:** Entity Framework Core
+- **Testing:** XUnit & Moq for unit and integration tests
 
-**Backend:**
-- .NET 9 Web API
-- Entity Framework Core (Code-First)
-- SQLite (or your configured database provider)
-- Repository Pattern & Service Layer
+### **Frontend (React + Vite)**
+- **UI Framework:** Mantine v7 (Premium component library)
+- **State Mgmt:** React Context API (Auth & Locale)
+- **Animations:** Custom CSS transitions & Mantine transitions
+- **Drag & Drop:** `@hello-pangea/dnd`
+- **i18n:** `react-intl`
 
-## 📂 Project Structure
+## 📂 Project Structure (Clean Architecture)
 
-- **`Frontend/`**: Contains the React + Vite application.
-- **`Backend/`**: Contains the .NET 9 Web API project and Solution file (`Todo_AntiGravity.sln`).
+- **`Backend/`**
+  - `src/TodoWithAI.Domain/`: Enterprise logic, Entities, Enums.
+  - `src/TodoWithAI.Application/`: DTOs, Business logic interfaces, Services.
+  - `src/TodoWithAI.Infrastructure/`: Data access (EF Core), Repository implementations, Migrations.
+  - `src/TodoWithAI.API/`: Controllers, JWT Config, Middleware.
+  - `tests/TodoWithAI.Tests.Unit/`: Backend unit tests.
+- **`Frontend/`**
+  - `src/api/`: Typed Axios services and interceptors.
+  - `src/contexts/`: Global Auth and Locale states.
+  - `src/pages/`: Unified AuthPage, Dashboard, and Boards.
+  - `src/test/`: Vitest component tests.
 
-## ⚙️ Getting Started
+## ⚙️ Development Setup
 
-### Prerequisites
-- Node.js (v18 or higher recommended)
-- .NET 9 SDK
-
-### Backend Setup
-1. Open a terminal and navigate to the `Backend` directory:
+### **Backend Setup**
+1. Navigate to `Backend/`
+2. Update `appsettings.Development.json` with your connection string (default uses LocalDB/SQLite).
+3. Apply migrations:
    ```bash
-   cd Backend
+   dotnet ef database update --project src/TodoWithAI.Infrastructure --startup-project src/TodoWithAI.API
    ```
-2. Apply Entity Framework migrations to setup the database:
+4. Run:
    ```bash
-   dotnet ef database update
+   dotnet run --project src/TodoWithAI.API
    ```
-3. Run the API:
-   ```bash
-   dotnet run
-   ```
-   *The backend typically runs on `http://localhost:5202`.*
 
-### Frontend Setup
-1. Open a new terminal and navigate to the `Frontend` directory:
-   ```bash
-   cd Frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the Vite development server:
-   ```bash
-   npm run dev
-   ```
-   *The frontend will run on `http://localhost:5173`. If it crashes upon reloading with Chrome DevTools open, make sure `usePolling: true` is enabled in `vite.config.ts`.*
+### **Frontend Setup**
+1. Navigate to `Frontend/`
+2. Install dependencies: `npm install`
+3. Run: `npm run dev`
 
-## 📸 Usage
-- **Add a Page:** Click "Add New Page" in the sidebar to create a fresh board.
-- **Edit Page Title:** Double click the page name in the sidebar.
-- **Change Icon:** Click the emoji next to the page name in the sidebar.
-- **Delete Page:** Right-click on a page name in the sidebar to delete it.
-- **Manage Tasks:** Type a task into the input box and use the Kanban board to drag it between "Todo", "In Progress", and "Done".
+### **Running Tests**
+- **Backend:** `dotnet test`
+- **Frontend:** `npm test`
 
 ---
 
-## Screenshots
-### Login Page
-- <img width="1869" height="917" alt="image" src="https://github.com/user-attachments/assets/92363aca-e5c4-4d50-bf5d-0f821f45a345" />
-### Dashboard Page
-- <img width="1875" height="916" alt="image" src="https://github.com/user-attachments/assets/b032fcf0-6425-41ef-970b-539080b8d0e2" />
-### Todo Item Page
-- <img width="1848" height="919" alt="image" src="https://github.com/user-attachments/assets/b05a446e-ba9a-43e2-b8ad-5e40cb169db4" />
+## 📸 Preview
 
+### **Premium Auth Experience**
+The login and register experience is integrated into a single, high-fidelity split-screen page with localized error handling and smooth animations.
 
+- <img width="1869" height="917" alt="Auth Page" src="https://github.com/user-attachments/assets/92363aca-e5c4-4d50-bf5d-0f821f45a345" />
+
+### **Main Dashboard**
+- <img width="1875" height="916" alt="Dashboard" src="https://github.com/user-attachments/assets/b032fcf0-6425-41ef-970b-539080b8d0e2" />
