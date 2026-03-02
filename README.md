@@ -79,4 +79,12 @@ TickIt! is a modern, dynamic, and fully responsive To-Do application featuring a
 
 ---
 
-*Made with ❤️ by AntiGravity AI*
+## Screenshots
+### Login Page
+- <img width="1869" height="917" alt="image" src="https://github.com/user-attachments/assets/92363aca-e5c4-4d50-bf5d-0f821f45a345" />
+### Dashboard Page
+- <img width="1875" height="916" alt="image" src="https://github.com/user-attachments/assets/b032fcf0-6425-41ef-970b-539080b8d0e2" />
+### Todo Item Page
+- <img width="1848" height="919" alt="image" src="https://github.com/user-attachments/assets/b05a446e-ba9a-43e2-b8ad-5e40cb169db4" />
+
+
