@@ -1,10 +1,14 @@
 # .NET / Backend
-Backend/bin/
-Backend/obj/
-Backend/appsettings.Development.json
-Backend/appsettings.*.json
+[Bb]in/
+[Oo]bj/
+Backend/src/*/bin/
+Backend/src/*/obj/
+Backend/src/*/appsettings.Development.json
+Backend/src/*/appsettings.*.json
+*.log
 
 # Node / Frontend
+node_modules/
 Frontend/node_modules/
 Frontend/dist/
 Frontend/.env
@@ -18,3 +22,5 @@ Frontend/.env.*
 *.user
 *.userosscache
 *.sln.docstates
+*.vsproj
+*.vsidx
