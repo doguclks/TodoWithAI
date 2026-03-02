@@ -2,8 +2,10 @@ import { Todo } from "../models/todo";
 import { apiClient } from "./api";
 
 export const TodoApi = {
-    getTodos: async (): Promise<Todo[]> => {
-        const response = await apiClient.get("/todos");
+    getTodos: async (search?: string): Promise<Todo[]> => {
+        const response = await apiClient.get("/todos", {
+            params: { search }
+        });
         return response.data;
     },
 
@@ -23,5 +25,17 @@ export const TodoApi = {
 
     deleteTodo: async (id: number): Promise<void> => {
         await apiClient.delete(`/todos/${id}`);
+    },
+
+    pinTodo: async (id: number): Promise<void> => {
+        await apiClient.patch(`/todos/${id}/pin`);
+    },
+
+    unpinTodo: async (id: number): Promise<void> => {
+        await apiClient.patch(`/todos/${id}/unpin`);
+    },
+
+    updateOrder: async (orders: { id: number, order: number }[]): Promise<void> => {
+        await apiClient.put('/todos/order', orders);
     },
 };

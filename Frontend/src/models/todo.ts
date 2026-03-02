@@ -16,5 +16,7 @@ export interface Todo {
     title: string;
     icon: string;
     date: string;
+    isPinned: boolean;
+    order: number;
     items: TodoItem[];
 }

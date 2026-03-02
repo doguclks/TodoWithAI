@@ -39,3 +39,25 @@
 .add-card:hover {
     background: light-dark(var(--mantine-color-indigo-0), rgba(76, 110, 245, 0.1));
 }
+
+.search-input input {
+    border-color: var(--mantine-color-gray-3);
+    transition: all 0.2s ease;
+}
+
+.search-input input:focus {
+    border-color: var(--mantine-color-indigo-5);
+    box-shadow: 0 0 0 2px rgba(76, 110, 245, 0.1);
+}
+
+@media (max-width: 768px) {
+    .dashboard-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .search-input {
+        width: 100% !important;
+    }
+}

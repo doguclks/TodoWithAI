@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ScrollArea, NavLink, ActionIcon, Group, Text, Loader, Center, Popover, TextInput } from '@mantine/core';
-import { IconPlus, IconCheck, IconX, IconTrash, IconLayoutDashboard } from '@tabler/icons-react';
+import { IconPlus, IconCheck, IconX, IconTrash, IconLayoutDashboard, IconPin, IconPinFilled } from '@tabler/icons-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { useIntl } from 'react-intl';
@@ -11,6 +11,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TodoApi } from '../../api/api';
 import { Todo } from '../../models/todo';
 import { dispatchTodoUpdateEvent, dispatchTodosChangedEvent } from '../../events/todoEvents';
+
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 export function Sidebar() {
     const [todos, setTodos] = useState<Todo[]>([]);
@@ -51,7 +53,9 @@ export function Sidebar() {
         try {
             const newTodo = await TodoApi.createTodo({
                 title: intl.formatMessage({ id: 'common.newPage', defaultMessage: 'New Page' }),
-                icon: '📄'
+                icon: '📄',
+                isPinned: false,
+                order: todos.length
             });
             setTodos(prev => [...prev, newTodo]);
             navigate(`/todo/${newTodo.id}`);
@@ -128,6 +132,48 @@ export function Sidebar() {
         });
     };
 
+    const handlePin = async (id: number) => {
+        try {
+            await TodoApi.pinTodo(id);
+            fetchTodos();
+            dispatchTodosChangedEvent();
+        } catch (error) {
+            console.error("Failed to pin todo", error);
+        }
+    };
+
+    const handleUnpin = async (id: number) => {
+        try {
+            await TodoApi.unpinTodo(id);
+            fetchTodos();
+            dispatchTodosChangedEvent();
+        } catch (error) {
+            console.error("Failed to unpin todo", error);
+        }
+    };
+
+    const onDragEnd = async (result: DropResult) => {
+        if (!result.destination) return;
+
+        const reorderedTodos = Array.from(todos);
+        const [removed] = reorderedTodos.splice(result.source.index, 1);
+        reorderedTodos.splice(result.destination.index, 0, removed);
+
+        setTodos(reorderedTodos);
+
+        try {
+            const updates = reorderedTodos.map((t, index) => ({
+                id: t.id,
+                order: index
+            }));
+            await TodoApi.updateOrder(updates);
+            dispatchTodosChangedEvent();
+        } catch (error) {
+            console.error('Failed to update order', error);
+            fetchTodos();
+        }
+    };
+
     return (
         <>
             <ScrollArea className="sidebar-scroll" style={{ flex: 1, padding: '10px' }}>
@@ -144,79 +190,110 @@ export function Sidebar() {
                 {loading ? (
                     <Center mt="md"><Loader size="sm" type="dots" /></Center>
                 ) : (
-                    <AnimatePresence initial={false}>
-                        {todos.map((todo) => {
-                            const isActive = location.pathname === `/todo/${todo.id}`;
-                            return (
-                                <motion.div
-                                    key={todo.id}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    <NavLink
-                                        active={isActive}
-                                        onClick={() => { if (editingId !== todo.id) navigate(`/todo/${todo.id}`); }}
-                                        label={
-                                            editingId === todo.id ? (
-                                                <Group gap="xs" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
-                                                    <TextInput
-                                                        size="xs"
-                                                        value={editTitle}
-                                                        onChange={(e) => setEditTitle(e.currentTarget.value)}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === 'Enter') saveEdit(todo);
-                                                            if (e.key === 'Escape') setEditingId(null);
-                                                        }}
-                                                        autoFocus
-                                                    />
-                                                    <ActionIcon size="sm" color="green" onClick={() => saveEdit(todo)}><IconCheck size={14} /></ActionIcon>
-                                                    <ActionIcon size="sm" color="red" onClick={() => setEditingId(null)}><IconX size={14} /></ActionIcon>
-                                                </Group>
-                                            ) : (
-                                                <Text size="sm" fw={isActive ? 600 : 400} onDoubleClick={() => startEditing(todo)} truncate>
-                                                    {todo.title}
-                                                </Text>
-                                            )
-                                        }
-                                        leftSection={
-                                            <Popover width={350} position="right" withArrow shadow="md">
-                                                <Popover.Target>
-                                                    <ActionIcon variant="subtle" size="sm" onClick={(e) => e.stopPropagation()}>
-                                                        <Text size="lg">{todo.icon || '📄'}</Text>
-                                                    </ActionIcon>
-                                                </Popover.Target>
-                                                <Popover.Dropdown p={0}>
-                                                    <EmojiPicker
-                                                        onEmojiClick={(e: EmojiClickData) => handleUpdateIcon(todo, e.emoji)}
-                                                        lazyLoadEmojis={true}
-                                                    />
-                                                </Popover.Dropdown>
-                                            </Popover>
-                                        }
-                                        rightSection={
-                                            <ActionIcon
-                                                variant="subtle"
-                                                color="gray"
-                                                size="sm"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    confirmDeletePage(todo.id);
-                                                }}
-                                                className="sidebar-delete-btn"
-                                            >
-                                                <IconTrash size={14} />
-                                            </ActionIcon>
-                                        }
-                                        variant="light"
-                                        color="indigo"
-                                        style={{ borderRadius: '8px', marginBottom: '4px' }}
-                                    />
-                                </motion.div>
-                            );
-                        })}
-                    </AnimatePresence>
+                    <DragDropContext onDragEnd={onDragEnd}>
+                        <Droppable droppableId="sidebar-todos">
+                            {(provided) => (
+                                <div {...provided.droppableProps} ref={provided.innerRef}>
+                                    <AnimatePresence initial={false}>
+                                        {todos.map((todo, index) => {
+                                            const isActive = location.pathname === `/todo/${todo.id}`;
+                                            return (
+                                                <Draggable key={todo.id} draggableId={todo.id.toString()} index={index}>
+                                                    {(provided) => (
+                                                        <div
+                                                            ref={provided.innerRef}
+                                                            {...provided.draggableProps}
+                                                            {...provided.dragHandleProps}
+                                                        >
+                                                            <motion.div
+                                                                initial={{ opacity: 0, x: -20 }}
+                                                                animate={{ opacity: 1, x: 0 }}
+                                                                exit={{ opacity: 0, x: -20 }}
+                                                                transition={{ duration: 0.2 }}
+                                                            >
+                                                                <NavLink
+                                                                    active={isActive}
+                                                                    onClick={() => { if (editingId !== todo.id) navigate(`/todo/${todo.id}`); }}
+                                                                    label={
+                                                                        editingId === todo.id ? (
+                                                                            <Group gap="xs" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+                                                                                <TextInput
+                                                                                    size="xs"
+                                                                                    value={editTitle}
+                                                                                    onChange={(e) => setEditTitle(e.currentTarget.value)}
+                                                                                    onKeyDown={(e) => {
+                                                                                        if (e.key === 'Enter') saveEdit(todo);
+                                                                                        if (e.key === 'Escape') setEditingId(null);
+                                                                                    }}
+                                                                                    autoFocus
+                                                                                />
+                                                                                <ActionIcon size="sm" color="green" onClick={() => saveEdit(todo)}><IconCheck size={14} /></ActionIcon>
+                                                                                <ActionIcon size="sm" color="red" onClick={() => setEditingId(null)}><IconX size={14} /></ActionIcon>
+                                                                            </Group>
+                                                                        ) : (
+                                                                            <Text size="sm" fw={isActive ? 600 : 400} onDoubleClick={() => startEditing(todo)} truncate>
+                                                                                {todo.title}
+                                                                            </Text>
+                                                                        )
+                                                                    }
+                                                                    leftSection={
+                                                                        <Popover width={350} position="right" withArrow shadow="md">
+                                                                            <Popover.Target>
+                                                                                <ActionIcon variant="subtle" size="sm" onClick={(e) => e.stopPropagation()}>
+                                                                                    <Text size="lg">{todo.icon || '📄'}</Text>
+                                                                                </ActionIcon>
+                                                                            </Popover.Target>
+                                                                            <Popover.Dropdown p={0}>
+                                                                                <EmojiPicker
+                                                                                    onEmojiClick={(e: EmojiClickData) => handleUpdateIcon(todo, e.emoji)}
+                                                                                    lazyLoadEmojis={true}
+                                                                                />
+                                                                            </Popover.Dropdown>
+                                                                        </Popover>
+                                                                    }
+                                                                    rightSection={
+                                                                        <Group gap={4}>
+                                                                            <ActionIcon
+                                                                                variant="subtle"
+                                                                                color={todo.isPinned ? "blue" : "gray"}
+                                                                                size="sm"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    todo.isPinned ? handleUnpin(todo.id) : handlePin(todo.id);
+                                                                                }}
+                                                                            >
+                                                                                {todo.isPinned ? <IconPinFilled size={14} /> : <IconPin size={14} />}
+                                                                            </ActionIcon>
+                                                                            <ActionIcon
+                                                                                variant="subtle"
+                                                                                color="gray"
+                                                                                size="sm"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    confirmDeletePage(todo.id);
+                                                                                }}
+                                                                                className="sidebar-delete-btn"
+                                                                            >
+                                                                                <IconTrash size={14} />
+                                                                            </ActionIcon>
+                                                                        </Group>
+                                                                    }
+                                                                    variant="light"
+                                                                    color="indigo"
+                                                                    style={{ borderRadius: '8px', marginBottom: '4px' }}
+                                                                />
+                                                            </motion.div>
+                                                        </div>
+                                                    )}
+                                                </Draggable>
+                                            );
+                                        })}
+                                    </AnimatePresence>
+                                    {provided.placeholder}
+                                </div>
+                            )}
+                        </Droppable>
+                    </DragDropContext>
                 )}
             </ScrollArea>
             <div style={{ padding: '16px', borderTop: '1px solid var(--mantine-color-default-border)' }}>

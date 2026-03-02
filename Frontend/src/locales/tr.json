@@ -36,5 +36,7 @@
     "common.pageNotFound": "Sayfa bulunamadı",
     "notification.errorTitleUpdate": "Başlık güncellenemedi",
     "notification.errorIconUpdate": "İkon güncellenemedi",
-    "validation.titleRequired": "Başlık zorunludur"
+    "validation.titleRequired": "Başlık zorunludur",
+    "dashboard.searchPlaceholder": "Panolarda ara...",
+    "common.search": "Ara"
 }
