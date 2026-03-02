@@ -14,15 +14,19 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 export default function Dashboard() {
     const [todos, setTodos] = useState<Todo[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isSearching, setIsSearching] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
     const intl = useIntl();
 
     const fetchTodos = async (search?: string) => {
         try {
-            setLoading(true);
+            if (!search && todos.length === 0) {
+                setLoading(true);
+            } else if (search) {
+                setIsSearching(true);
+            }
             const data = await TodoApi.getTodos(search);
-            // Sort by isPinned and then order if not searching
             const sortedData = search ? data : [...data].sort((a, b) => {
                 if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
                 return (a.order || 0) - (b.order || 0);
@@ -32,6 +36,7 @@ export default function Dashboard() {
             console.error('Failed to fetch todos', error);
         } finally {
             setLoading(false);
+            setIsSearching(false);
         }
     };
 
@@ -142,6 +147,7 @@ export default function Dashboard() {
                     <TextInput
                         placeholder={intl.formatMessage({ id: 'dashboard.searchPlaceholder', defaultMessage: 'Search boards...' })}
                         leftSection={<IconSearch size={18} stroke={1.5} />}
+                        rightSection={isSearching ? <Loader size="xs" /> : null}
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.currentTarget.value)}
                         size="md"

@@ -14,14 +14,19 @@ public class TodoItemRepository : ITodoItemRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<TodoItem>> GetByTodoIdAsync(int todoId)
+    public async Task<IEnumerable<TodoItem>> GetByTodoIdAsync(int todoId, string userId)
     {
-        return await _context.TodoItems.Where(i => i.TodoId == todoId).ToListAsync();
+        return await _context.TodoItems
+            .Include(i => i.Todo)
+            .Where(i => i.TodoId == todoId && i.Todo.UserId == userId)
+            .ToListAsync();
     }
 
-    public async Task<TodoItem?> GetByIdAsync(int id)
+    public async Task<TodoItem?> GetByIdAsync(int id, string userId)
     {
-        return await _context.TodoItems.FindAsync(id);
+        return await _context.TodoItems
+            .Include(i => i.Todo)
+            .FirstOrDefaultAsync(i => i.Id == id && i.Todo.UserId == userId);
     }
 
     public async Task<TodoItem> AddAsync(TodoItem item)
@@ -31,15 +36,19 @@ public class TodoItemRepository : ITodoItemRepository
         return item;
     }
 
-    public async Task UpdateAsync(TodoItem item)
+    public async Task UpdateAsync(TodoItem item, string userId)
     {
-        _context.Entry(item).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+        var existingItem = await GetByIdAsync(item.Id, userId);
+        if (existingItem != null)
+        {
+            _context.Entry(existingItem).CurrentValues.SetValues(item);
+            await _context.SaveChangesAsync();
+        }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(int id, string userId)
     {
-        var item = await _context.TodoItems.FindAsync(id);
+        var item = await GetByIdAsync(id, userId);
         if (item != null)
         {
             _context.TodoItems.Remove(item);

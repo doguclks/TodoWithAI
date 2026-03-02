@@ -14,9 +14,9 @@ public class TodoRepository : ITodoRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Todo>> GetAllAsync(string? search = null)
+    public async Task<IEnumerable<Todo>> GetAllAsync(string userId, string? search = null)
     {
-        var query = _context.Todos.Include(t => t.Items).AsQueryable();
+        var query = _context.Todos.Include(t => t.Items).Where(t => t.UserId == userId).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -29,9 +29,9 @@ public class TodoRepository : ITodoRepository
             .ToListAsync();
     }
 
-    public async Task<Todo?> GetByIdAsync(int id)
+    public async Task<Todo?> GetByIdAsync(int id, string userId)
     {
-        return await _context.Todos.Include(t => t.Items).FirstOrDefaultAsync(t => t.Id == id);
+        return await _context.Todos.Include(t => t.Items).FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
     }
 
     public async Task<Todo> AddAsync(Todo todo)
@@ -47,11 +47,11 @@ public class TodoRepository : ITodoRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateOrderAsync(IEnumerable<(int Id, int Order)> orders)
+    public async Task UpdateOrderAsync(IEnumerable<(int Id, int Order)> orders, string userId)
     {
         foreach (var (id, order) in orders)
         {
-            var todo = await _context.Todos.FindAsync(id);
+            var todo = await _context.Todos.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
             if (todo != null)
             {
                 todo.Order = order;
@@ -60,9 +60,9 @@ public class TodoRepository : ITodoRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(int id, string userId)
     {
-        var todo = await _context.Todos.FindAsync(id);
+        var todo = await _context.Todos.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
         if (todo != null)
         {
             _context.Todos.Remove(todo);

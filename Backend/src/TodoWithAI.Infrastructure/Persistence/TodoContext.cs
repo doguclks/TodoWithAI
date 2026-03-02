@@ -1,9 +1,10 @@
 using TodoWithAI.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace TodoWithAI.Infrastructure.Persistence;
 
-public class TodoContext : DbContext
+public class TodoContext : IdentityDbContext<ApplicationUser>
 {
     public TodoContext(DbContextOptions<TodoContext> options) : base(options) { }
 
@@ -12,6 +13,8 @@ public class TodoContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Todo>(entity =>
         {
             entity.HasKey(e => e.Id);
