@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "rftylKjmshQ=",
+  "success": true,
+  "projectFilePath": "C:\\Projects\\Todo_AntiGravity\\Backend\\src\\TodoWithAI.Domain\\TodoWithAI.Domain.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\dcalk\\.nuget\\packages\\microsoft.net.sdk.compilers.toolset\\9.0.200\\microsoft.net.sdk.compilers.toolset.9.0.200.nupkg.sha512"
+  ],
+  "logs": []
+}
